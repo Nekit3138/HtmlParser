@@ -29,16 +29,17 @@ namespace HtmlParser
             return http;
         }
 
-        public string Find(string tag, List<string> attr_attrValue)
+        /// <param name="tag">A tag of the... Tag?</param>
+        /// <param name="attr_attrValue">Attributes in format: key="value"</param>
+        /// <returns>String, which contains a value of tag was found</returns>
+        public string Find(string tag, List<string> attrs)
         {
             if (http == null)
                 throw new Exception("The link is empty, use method SetPage first!");
             var result = new Regex($"<{tag}.*>(.*)</{tag}>").Matches(http);
-            foreach (var cls in attr_attrValue)
-            {
+            foreach (var cls in attrs)
                 result = new Regex($"<{tag}.*{cls}.*>(.*)</{tag}>")
                     .Matches(http);
-            }
 
             return result.FirstOrDefault() != null
                 ? result[0].Groups[1].Value
