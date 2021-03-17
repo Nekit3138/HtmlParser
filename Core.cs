@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 
 namespace HtmlParser
 {
@@ -21,43 +24,41 @@ namespace HtmlParser
             http = client.GetAsync(link).Result.Content.ReadAsStringAsync().Result;
         }
 
-        public string GetPage()
+        public string GetContent()
         {
             return http;
         }
 
-        public string Find(string attr, string attrValue)
+        public string Find(string tag, List<string> attr_attrValue)
         {
             if (http == null)
                 throw new Exception("The link is empty, use method SetPage first!");
-            int index = http.IndexOf($"{attr}=\"{attrValue}\"");
-            if (index == -1)
+            var result = new Regex($"<{tag}.*>(.*)</{tag}>").Matches(http);
+            foreach (var cls in attr_attrValue)
             {
-                return "Not found";
+                result = new Regex($"<{tag}.*{cls}.*>(.*)</{tag}>")
+                    .Matches(http);
             }
 
-            int startIndex = 0;
-            int endIndex = 0;
-            string result = "";
-            for (var i = index; i != http.Length; i++)
+            return result.FirstOrDefault() != null
+                ? result[0].Groups[1].Value
+                : "Not found";
+        }
+
+        public List<string> FindAll(string tag, List<string> attr_attrValue)
+        {
+            if (http == null)
+                throw new Exception("The link is empty, use method SetPage first!");
+            var result = new Regex($"<{tag}.*>(.*)</{tag}>").Matches(http);
+            foreach (var cls in attr_attrValue)
             {
-                if (http[i] == '>')
-                {
-                    startIndex = i;
-                }
-                else if (http[i] == '<')
-                {
-                    endIndex = i;
-                    break;
-                }
+                result = new Regex($"<{tag}.*{cls}.*>(.*)</{tag}>")
+                    .Matches(http);
             }
 
-            for (var i = startIndex + 1; i != endIndex; i++)
-            {
-                result += http[i];
-            }
-
-            return result;
+            return result.FirstOrDefault() != null
+                ? result.Select(i => i.Groups[1].Value).ToList()
+                : new List<string>();
         }
     }
 }
