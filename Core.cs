@@ -52,10 +52,8 @@ namespace HtmlParser
                 throw new Exception("The link is empty, use method SetPage first!");
             var result = new Regex($"<{tag}.*>(.*)</{tag}>").Matches(http);
             foreach (var cls in attr_attrValue)
-            {
                 result = new Regex($"<{tag}.*{cls}.*>(.*)</{tag}>")
                     .Matches(http);
-            }
 
             return result.FirstOrDefault() != null
                 ? result.Select(i => i.Groups[1].Value).ToList()
